@@ -71,10 +71,15 @@ export default function Home() {
   const [currentUserName, setCurrentUserName] = React.useState<
     string | undefined
   >();
-  const [route, setRoute] = React.useState<"home" | "login" | "ranking">(
+  const [route, setRoute] = React.useState<"home" | "login" | "ranking" | "signup">(
     "login"
   );
   const [newRating, setNewRating] = React.useState<number>(5);
+  const [loginError, setLoginError] = React.useState<string | undefined>();
+  const [signupError, setSignupError] = React.useState<string | undefined>();
+  const [loginPwdVisible, setLoginPwdVisible] = React.useState<boolean>(false);
+  const [signupPwdVisible, setSignupPwdVisible] = React.useState<boolean>(false);
+  const [signupConfirmVisible, setSignupConfirmVisible] = React.useState<boolean>(false);
 
   const mapContainerRef = React.useRef<HTMLDivElement>(null);
   const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN as string | undefined;
@@ -428,42 +433,43 @@ export default function Home() {
           </div>
           <div>
             <Label htmlFor="login-password">Senha</Label>
-            <Input
-              id="login-password"
-              type="password"
-              autoComplete="current-password"
-            />
+            <div className="flex items-center gap-2">
+              <Input id="login-password" type={loginPwdVisible ? "text" : "password"} autoComplete="current-password" />
+              <Button type="button" variant="outline" className="h-9" onClick={() => setLoginPwdVisible((v) => !v)}>
+                {loginPwdVisible ? "Ocultar" : "Mostrar"}
+              </Button>
+            </div>
           </div>
+          {loginError && (
+            <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{loginError}</div>
+          )}
           <div className="grid grid-cols-1 gap-2 pt-2">
             <Button
               type="button"
               className="h-12 w-full justify-center"
               onClick={() => {
-                const uEl = document.getElementById(
-                  "login-username"
-                ) as HTMLInputElement;
-                const pEl = document.getElementById(
-                  "login-password"
-                ) as HTMLInputElement;
-                const rEl = document.getElementById(
-                  "login-remember"
-                ) as HTMLInputElement;
+                const uEl = document.getElementById("login-username") as HTMLInputElement;
+                const pEl = document.getElementById("login-password") as HTMLInputElement;
                 const username = (uEl?.value || "").trim();
                 const password = (pEl?.value || "").trim();
-                const remember = Boolean(rEl?.checked);
-                if (!username || !password) return;
-                const userId = `user:${username.toLowerCase()}`;
+                if (!username || !password) { setLoginError("Informe usuário e senha."); return; }
+                const raw = localStorage.getItem("users");
+                const users = raw ? JSON.parse(raw) as Record<string, { username: string; password: string; name?: string }> : {};
+                const key = username.toLowerCase();
+                const found = users[key];
+                if (!found || found.password !== password) { setLoginError("Usuário ou senha inválidos."); return; }
+                const userId = `user:${key}`;
                 setCurrentUserId(userId);
-                setCurrentUserName(username);
-                if (remember) {
-                  localStorage.setItem("currentUserId", userId);
-                  localStorage.setItem("currentUserName", username);
-                }
+                setCurrentUserName(found.name || username);
+                localStorage.setItem("currentUserId", userId);
+                localStorage.setItem("currentUserName", found.name || username);
+                setLoginError(undefined);
                 setRoute("home");
               }}
             >
-              ENTRAR
+              Entrar
             </Button>
+            <Button type="button" variant="outline" className="h-12 w-full justify-center" onClick={() => setRoute("signup")}>Criar conta</Button>
           </div>
         </div>
       </div>
@@ -539,6 +545,81 @@ export default function Home() {
               </div>
             );
           })()}
+        </div>
+      </div>
+    </div>
+  ) : route === "signup" ? (
+    <div className="relative h-full">
+      <div className="fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg border border-neutral-300 bg-white p-4 shadow-2xl focus:outline-none md:p-6">
+        <div className="flex items-center justify-center gap-3">
+          <Map className="h-6 w-6 text-neutral-900" aria-hidden="true" />
+          <h2 className="text-xl font-bold text-center">Criar conta</h2>
+        </div>
+        <div className="mt-4 space-y-3">
+          <div>
+            <Label htmlFor="signup-name">Nome</Label>
+            <Input id="signup-name" />
+          </div>
+          <div>
+            <Label htmlFor="signup-username">Usuário</Label>
+            <Input id="signup-username" autoComplete="username" />
+          </div>
+          <div>
+            <Label htmlFor="signup-password">Senha</Label>
+            <div className="flex items-center gap-2">
+              <Input id="signup-password" type={signupPwdVisible ? "text" : "password"} autoComplete="new-password" />
+              <Button type="button" variant="outline" className="h-9" onClick={() => setSignupPwdVisible((v) => !v)}>
+                {signupPwdVisible ? "Ocultar" : "Mostrar"}
+              </Button>
+            </div>
+          </div>
+          <div>
+            <Label htmlFor="signup-confirm">Confirmar senha</Label>
+            <div className="flex items-center gap-2">
+              <Input id="signup-confirm" type={signupConfirmVisible ? "text" : "password"} autoComplete="new-password" />
+              <Button type="button" variant="outline" className="h-9" onClick={() => setSignupConfirmVisible((v) => !v)}>
+                {signupConfirmVisible ? "Ocultar" : "Mostrar"}
+              </Button>
+            </div>
+          </div>
+          {signupError && (
+            <div className="rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700">{signupError}</div>
+          )}
+          <div className="grid grid-cols-1 gap-2 pt-2">
+            <Button
+              type="button"
+              className="h-12 w-full justify-center"
+              onClick={() => {
+                const nEl = document.getElementById("signup-name") as HTMLInputElement;
+                const uEl = document.getElementById("signup-username") as HTMLInputElement;
+                const pEl = document.getElementById("signup-password") as HTMLInputElement;
+                const cEl = document.getElementById("signup-confirm") as HTMLInputElement;
+                const name = (nEl?.value || "").trim();
+                const username = (uEl?.value || "").trim();
+                const password = (pEl?.value || "").trim();
+                const confirm = (cEl?.value || "").trim();
+                if (!username || !password) { setSignupError("Informe usuário e senha."); return; }
+                if (password.length < 6) { setSignupError("Senha deve ter ao menos 6 caracteres."); return; }
+                if (password !== confirm) { setSignupError("As senhas não coincidem."); return; }
+                const raw = localStorage.getItem("users");
+                const users = raw ? JSON.parse(raw) as Record<string, { username: string; password: string; name?: string }> : {};
+                const key = username.toLowerCase();
+                if (users[key]) { setSignupError("Usuário já existe."); return; }
+                users[key] = { username, password, name: name || undefined };
+                localStorage.setItem("users", JSON.stringify(users));
+                const userId = `user:${key}`;
+                setCurrentUserId(userId);
+                setCurrentUserName(name || username);
+                localStorage.setItem("currentUserId", userId);
+                localStorage.setItem("currentUserName", name || username);
+                setSignupError(undefined);
+                setRoute("home");
+              }}
+            >
+              Criar e entrar
+            </Button>
+            <Button type="button" variant="outline" className="h-12 w-full justify-center" onClick={() => setRoute("login")}>Já tenho conta</Button>
+          </div>
         </div>
       </div>
     </div>
