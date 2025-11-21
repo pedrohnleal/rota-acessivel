@@ -1,0 +1,32 @@
+{
+  "name": "rota-acessivel",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "mapbox-gl": "^3.4.0",
+    "maplibre-gl": "^4.2.0",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-label": "^2.0.2",
+    "lucide-react": "^0.474.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3",
+    "vite": "^5.4.9",
+    "@vitejs/plugin-react": "^4.3.2",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "tailwindcss": "^3.4.13",
+    "postcss": "^8.4.47",
+    "autoprefixer": "^10.4.20"
+  }
+}

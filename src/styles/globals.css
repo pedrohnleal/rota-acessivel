@@ -1,0 +1,27 @@
+/* Estilos base dos motores de mapa - devem vir antes de outras regras */
+@import 'maplibre-gl/dist/maplibre-gl.css';
+@import 'mapbox-gl/dist/mapbox-gl.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Variáveis de cor para uso fora do Tailwind */
+:root {
+  --color-primary: #0052CC;
+  --color-success: #137B39;
+  --color-warning: #8A7000;
+  --color-danger: #A61222;
+  --color-bg: #FFFFFF;
+  --color-text: #0E1419;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, sans-serif;
+  color: var(--color-text);
+  background: var(--color-bg);
+}
